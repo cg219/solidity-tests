@@ -1,6 +1,12 @@
 # Setup
 
-`npm instal -g ganache-cli`
+### Install Solidity Compiler and Ganache CLI
+```
+brew update
+brew tap ethereum/ethereum
+brew install solidity
+npm instal -g ganache-cli
+```
 
 # Compile
 
