@@ -3,49 +3,54 @@ import { filterValues } from 'https://deno.land/std@0.113.0/collections/mod.ts';
 import { assert, assertEquals } from 'https://deno.land/std@0.113.0/testing/asserts.ts';
 import Web3 from 'https://deno.land/x/web3@v0.4.3/mod.ts'
 
-const web3 = new Web3('ws://localhost:8545');
-const Contract = web3.eth.Contract;
+const web3 = new Web3('ws://localhost:7545');
 const decoder = new TextDecoder('utf8');
-const contractData = await Deno.readFile(resolve(Deno.cwd(), 'bin', 'Inbox.bin'));
-const abiData = await Deno.readFile(resolve(Deno.cwd(), 'bin', 'Inbox.abi'));
-const contract = decoder.decode(contractData);
-const abi = decoder.decode(abiData);
+const contractData = await fetch(`file://${resolve(Deno.cwd(), 'bin', 'Inbox.bin')}`);
+const abiData = await fetch(`file://${resolve(Deno.cwd(), 'bin', 'Inbox.abi')}`);
+const contract = await contractData.text();
+const abi = await abiData.json();
 
 let accounts;
 let inbox;
 
-Deno.test('Deploy Contract 1', async () => {
-    accounts = await web3.eth.getAccounts();
-
-    await deployContract(accounts[0]);
-    assert(inbox.options.address);
+Deno.test({
+    name: 'Deploy Contract 1',
+    async fn() {
+        accounts = await web3.eth.getAccounts();
+        await deployContract(accounts[0]);
+        assert(inbox.options.address);
+    },
+    sanitizeResources: false
 })
 
-Deno.test('It has a default message', async () => {
-    accounts = await web3.eth.getAccounts();
-
-    await deployContract(accounts[0]);
-
-    const message = await inbox.methods.message().call();
-
-    assertEquals(message, 'Its Mente from Ethereum');
+Deno.test({
+    name: 'It has a default message',
+    async fn() {
+        accounts = await web3.eth.getAccounts();
+        await deployContract(accounts[0]);
+        const message = await inbox.methods.message().call();
+        assertEquals(message, 'Its Mente from Ethereum');
+    },
+    sanitizeResources: false
 })
 
-Deno.test('It can update message', async () => {
-    accounts = await web3.eth.getAccounts();
+Deno.test({
+    name: 'It can update message',
+    async fn() {
+        accounts = await web3.eth.getAccounts();
+        await deployContract(accounts[0]);
+        await inbox.methods.setMessage('Its Mente from the Test').send({
+            from: accounts[0]
+        });
 
-    await deployContract(accounts[0]);
-    await inbox.methods.setMessage('Its Mente from the Test').send({
-        from: accounts[0]
-    });
-
-    const message = await inbox.methods.message().call();
-
-    assertEquals(message, 'Its Mente from the Test');
+        const message = await inbox.methods.message().call();
+        assertEquals(message, 'Its Mente from the Test');
+    },
+    sanitizeResources: false
 })
 
 async function deployContract(account) {
-    inbox = await new Contract(JSON.parse(abi))
+    inbox = await new web3.eth.Contract(abi)
         .deploy({
             data: contract,
             arguments: ['Its Mente from Ethereum']
