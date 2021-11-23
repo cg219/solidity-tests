@@ -1,7 +1,7 @@
 import { resolve } from 'https://deno.land/std@0.113.0/path/mod.ts';
 import { filterValues } from 'https://deno.land/std@0.113.0/collections/mod.ts';
 import { assert, assertEquals } from 'https://deno.land/std@0.113.0/testing/asserts.ts';
-import Web3 from 'https://deno.land/x/web3@v0.4.3/mod.ts'
+import Web3 from 'https://deno.land/x/web3@v0.7.3/mod.ts'
 
 const web3 = new Web3('ws://localhost:7545');
 const decoder = new TextDecoder('utf8');
